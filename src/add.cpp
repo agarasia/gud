@@ -4,6 +4,7 @@
 #include <fstream>
 #include <filesystem>
 #include "hash.hpp"
+#include "index.hpp"
 
 void handleAdd(const std::vector<std::string> &args)
 {
@@ -24,6 +25,9 @@ void handleAdd(const std::vector<std::string> &args)
         std::cerr << "Usage: gud add <file>\n";
         return;
     }
+
+    // Load the index to track staged files
+    IndexMap index = loadIndex();
 
     for (const auto &path : args)
     {
@@ -70,5 +74,11 @@ void handleAdd(const std::vector<std::string> &args)
         std::cout << "[ADD] The file '" << path << "' hath been added to the annals of gud.\n"
                   << "      Its essence now resides within the shadows, \n"
                   << "      A testament to thy deeds, forever etched in time.\n";
+
+        // Update the index with the new file path and its hash
+        updateIndex(index, path, hash);
     }
+
+    // Save the updated index
+    saveIndex(index);
 }
