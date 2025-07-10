@@ -14,105 +14,110 @@ To build a lightweight, fully functional version control system from scratch in 
 
 ## ✅ Features Implemented (So Far)
 
-### ✔️ `gud init`
+### ✔️ `gud create`
 
 Initializes a new empty `gud` repository by creating the following structure:
 
+```
 .gud/
 ├── HEAD # Points to current branch (refs/heads/master)
 ├── objects/ # Stores content-addressed blobs
 └── refs/
 └── heads/ # Branch references
-
-bash
-Copy code
-
-Command:
+```
 
 ```bash
-./gud init
-✔️ gud add <file>
+./gud create
+```
+
+### ✔️ `gud add` <file>
+
 Stages a file for commit by:
 
-Hashing the file content using SHA-1.
+1. Hashing the file content using SHA-1.
 
-Storing the content in .gud/objects/<hash>.blob.
+2. Storing the content in .gud/objects/<hash>.blob.
 
-Tracking the file path and hash in .gud/index (staging area).
+3. Tracking the file path and hash in .gud/index (staging area).
 
-Command:
-
-bash
-Copy code
+```
 ./gud add hello.txt
-Index format:
+```
 
-php-template
-Copy code
-<blob_hash> <file_path>
 Blob storage path:
 
-bash
-Copy code
+```
 .gud/objects/ab/cdef1234567890...blob
-🏗️ Project Structure
-python
-Copy code
+```
+
+## 🏗️ Project Structure
+
+```
 gud/
-├── .gud/               # Created at runtime – repository metadata
-├── include/            # Header files
-│   ├── hash.hpp        # SHA-1 hashing
-│   └── index.hpp       # Index (staging area) handling
-├── src/                # Implementation files
-│   ├── add.cpp         # gud add
-│   ├── commit.cpp      # gud commit (stub)
-│   ├── init.cpp        # gud init
-│   ├── hash.cpp        # Implements hashing
-│   └── index.cpp       # Index I/O
-├── main.cpp            # CLI entry point and dispatcher
-├── Makefile            # Build configuration
+├── .gud/ # Created at runtime – repository metadata
+├── include/ # Header files
+│ ├── hash.hpp # SHA-1 hashing
+│ └── index.hpp # Index (staging area) handling
+├── src/ # Implementation files
+│ ├── add.cpp # gud add
+│ ├── commit.cpp # gud commit (stub)
+│ ├── init.cpp # gud init
+│ ├── hash.cpp # Implements hashing
+│ └── index.cpp # Index I/O
+├── main.cpp # CLI entry point and dispatcher
+├── Makefile # Build configuration
 └── README.md
-🛠️ Build Instructions
-Requirements
-C++17 or later
+```
+
+## 🛠️ Build Instructions
+
+- Requirements
+- C++17 or later
 
 GNU Make
 
 Build
-bash
-Copy code
+
+```
 make
+```
+
 Run
-bash
-Copy code
-./gud init
+
+```
+./gud create
 ./gud add file.txt
 cat .gud/index
-🧠 Design Decisions
-SHA-1 is used for content-addressed storage like Git.
+```
 
-Blob objects are named by their hash and stored in subdirectories for performance.
+## 🧠 Design Decisions
 
-The index is a flat file tracking <hash> <filepath>, enough for a minimal staging system.
+- SHA-1 is used for content-addressed storage like Git.
 
-We use a header-only SHA-1 implementation for portability (no OpenSSL).
+- Blob objects are named by their hash and stored in subdirectories for performance.
 
-🚧 Upcoming Features
-gud commit: Create commits referencing blobs in the index.
+- The index is a flat file tracking <hash> <filepath>, enough for a minimal staging system.
 
-gud log: View commit history.
+- We use a header-only SHA-1 implementation for portability (no OpenSSL).
 
-gud checkout: Restore working directory from a specific commit.
+## 🚧 Upcoming Features
 
-Branching and merging.
+- gud commit: Create commits referencing blobs in the index.
 
-Diff and status.
+- gud log: View commit history.
 
-📜 License
+- gud checkout: Restore working directory from a specific commit.
+
+- Branching and merging.
+
+- Diff and status.
+
+## 📜 License
+
 MIT License — Free to use, learn, and improve upon.
 
-🧙 Author
+## 🧙 Author
+
 Aum Garasia — Software Engineering Grad @ ASU, Soulsborne fan, and Dark Souls lore enjoyer. This project is part of an effort to deepen understanding of version control systems and low-level storage.
 
 “A file may be lost, but the hash remains eternal.”
-```
