@@ -1,0 +1,34 @@
+# Build artifacts
+*.o
+*.out
+*.exe
+gud
+
+# Runtime repository
+.gud/
+
+# Test binaries
+tests/test_*
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS metadata files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage / debug
+*.gcda
+*.gcno
+*.gcov
+
+# Generated documentation or README
+README.md.bak
+docs/*.md~
