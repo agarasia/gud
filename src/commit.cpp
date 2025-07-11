@@ -118,6 +118,12 @@ void handleCommit(const std::vector<std::string> &args)
     std::string treeHash = writeTree(index);
     std::string commitHash = writeCommit(treeHash, parentHash, message);
 
+    std::cout << "[Commit] A new commit hath been forged in fire.\n"
+              << "         Hash: " << commitHash << "\n";
+
+    // ✅ Clear index
+    saveIndex({});
+
     // Update branch reference
     std::ifstream head(".gud/HEAD");
     std::string refLine;
