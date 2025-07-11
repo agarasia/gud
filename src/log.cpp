@@ -82,87 +82,76 @@ std::map<std::string, std::string> parseCommit(const std::string &content)
     return fields;
 }
 
+// Helper function to get the correct reference path from HEAD
+std::string resolveHeadRef()
+{
+    std::ifstream headFile(".gud/HEAD");
+    std::string line;
+    if (!headFile || !std::getline(headFile, line))
+        return "";
+
+    if (line.rfind("ref: ", 0) == 0)
+    {
+        return ".gud/" + line.substr(5);
+    }
+    return ".gud/" + line; // Direct commit hash
+}
+
 // Display commit information
 void logCommits()
 {
-    namespace fs = std::filesystem;
-    const std::string headPath = ".gud/HEAD";
-
-    // Read HEAD to find current branch ref
-    std::ifstream headFile(headPath);
-    if (!headFile.is_open())
+    std::ifstream headFile(".gud/HEAD");
+    if (!headFile)
     {
-        std::cerr << "[log] Could not open HEAD file. Is this a gud repository?\n";
+        std::cerr << COLOR_RED << "[LOG] No HEAD found. Are you in a gud repository?" << COLOR_RESET << std::endl;
         return;
     }
 
-    std::string headRef;
-    std::getline(headFile, headRef);
-    headFile.close();
-
-    // Handle "ref: refs/heads/master" format
-    if (headRef.rfind("ref: ", 0) == 0)
-    {
-        headRef = headRef.substr(5); // strip "ref: "
-    }
-
-    if (headRef.empty())
-    {
-        std::cerr << "[log] HEAD is empty. No commits to show.\n";
-        return;
-    }
-
-    // Compose full path to ref file
-    std::string refPath = ".gud/" + headRef;
+    std::string refPath = resolveHeadRef();
     std::ifstream refFile(refPath);
-    if (!refFile.is_open())
+    if (!refFile)
     {
-        std::cerr << "[log] Could not open ref file " << refPath << "\n";
+        std::cerr << COLOR_RED << "[LOG]    The annals yield only silence,\n"
+                  << "         Unkindled—the reference file "
+                  << refPath << "\n"
+                  << "         is lost to the abyss" << COLOR_RESET << std::endl;
         return;
     }
 
-    // Read commit hash from ref
-    std::string commitHash;
-    std::getline(refFile, commitHash);
-    refFile.close();
+    std::string currentHash;
+    std::getline(refFile, currentHash);
 
-    if (commitHash.empty())
+    std::cout << COLOR_CYAN << "[LOG]    The annals of Gud, a chronicle of thy deeds:" << COLOR_RESET << std::endl;
+
+    while (!currentHash.empty())
     {
-        std::cerr << "[log] No commits found on branch.\n";
-        return;
+        std::string objPath = ".gud/objects/" + currentHash.substr(0, 2) + "/" + currentHash.substr(2);
+        std::string content = readFile(objPath);
+        if (content.empty())
+            break;
+
+        auto fields = parseCommit(content);
+
+        std::cout << COLOR_BOLD << COLOR_GREEN << "Commit: " << currentHash << COLOR_RESET << std::endl;
+        std::cout << COLOR_YELLOW << "Author: " << fields["author"] << COLOR_RESET << std::endl;
+        std::cout << COLOR_YELLOW << "Message: " << fields["commit"] << COLOR_RESET << std::endl;
+        std::cout << COLOR_CYAN << "Tree: " << fields["tree"] << COLOR_RESET << std::endl;
+        std::cout << COLOR_CYAN << "Parent: " << (fields.count("parent") ? fields["parent"] : "None") << COLOR_RESET << std::endl;
+        std::cout << COLOR_CYAN << "----------------------------------------" << COLOR_RESET << std::endl;
+        std::cout << "\n";
+
+        // Traverse to parent commit
+        if (fields.count("parent"))
+            currentHash = fields["parent"];
+        else
+            break;
     }
 
-    // Read the commit object file
-    std::string commitPath = ".gud/objects/" + commitHash.substr(0, 2) + "/" + commitHash.substr(2);
-    std::ifstream commitFile(commitPath);
-    if (!commitFile.is_open())
-    {
-        std::cerr << "[log] Could not open commit object " << commitPath << "\n";
-        return;
-    }
-
-    std::stringstream buffer;
-    buffer << commitFile.rdbuf();
-    commitFile.close();
-
-    auto fields = parseCommit(buffer.str());
-
-    std::cout << "\033[1;34mCommit: " << commitHash << "\n";
-
-    if (fields.count("tree"))
-    {
-        std::cout << "\033[1;32mTree:   " << fields["tree"] << "\n";
-    }
-
-    if (fields.count("author"))
-    {
-        std::cout << "\033[1;36mAuthor: " << fields["author"] << "\n";
-    }
-
-    if (fields.count("commit"))
-    {
-        std::cout << "\033[1;33mMessage: " << fields["commit"] << "\n";
-    }
-
-    std::cout << "\n";
+    std::cout << COLOR_CYAN << "[LOG]    The annals have been read, and the tale is told." << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "[LOG]    May thy journey through Gud be ever fruitful." << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "[LOG]    Remember, the past is but a guide, not a chain." << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "[LOG]    Farewell, brave traveler." << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "[LOG]    The annals await thy next chapter." << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "[LOG]    Until we meet again, in the realm of Gud." << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "[LOG]    May the light of Gud guide thy path." << COLOR_RESET << std::endl;
 }

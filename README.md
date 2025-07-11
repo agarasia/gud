@@ -50,7 +50,7 @@ Blob storage path:
 .gud/objects/ab/cdef1234567890...blob
 ```
 
-### ✔️ `gud commit -m "message`
+### ✔️ `gud commit -m "message"`
 
 Creates a new commit by:
 
@@ -74,6 +74,41 @@ Creates a new commit by:
 ./gud commit -m "initial commit"
 ```
 
+### ✔️ `gud log`
+
+Displays the commit history in a colorized and stylized fashion by:
+
+1. Reading the current branch commit hash from `.gud/HEAD`.
+
+2. Traversing commit objects backward through their `parent` field.
+
+3. Parsing commit metadata (tree, author, time, message, parent).
+
+4. Printing commit details with colors for easy readability:
+
+   - Commit hash in **green**
+
+   - Author and date in **yellow**
+
+   - Message and parent commit in **cyan**
+
+5. Ending with poetic closure lines to enhance User Experience.
+
+```bash
+./gud log
+```
+
+Sample output excerpt:
+
+```
+Commit: e5acaa816217a2184f58c70177994aa3452204ef
+Author: Aum, Time: 2025-07-11 10:50:41
+Message: Initial commit
+Parent: None
+----------------------------------------
+
+```
+
 ## 🏗️ Project Structure
 
 ```
@@ -85,13 +120,19 @@ gud/
 │   ├── commit.hpp        # Commit logic
 │   └── sha1.hpp          # Header-only SHA-1 implementation
 ├── src/                  # Implementation files
-│   ├── create.cpp          # gud create
+│   ├── create.cpp        # gud create
 │   ├── add.cpp           # gud add
 │   ├── commit.cpp        # gud commit
 │   ├── hash.cpp          # Hashing wrappers
-│   └── index.cpp         # Index file parsing & writing
+│   ├── index.cpp         # Index parsing/writing
+│   └── log.cpp           # Commit log traversal and display
+├── tests/                # Test suites
+│   ├── test_add.cpp
+│   ├── test_commit.cpp
+│   ├── test_commit_multiple.cpp
+│   └── test_log.cpp
 ├── main.cpp              # CLI entry point
-├── Makefile              # Build configuration
+├── Makefile              # Build and test configuration
 └── README.md             # This file
 ```
 
@@ -108,27 +149,49 @@ Build
 make
 ```
 
-Run
+Run the program:
 
-```
+```bash
 ./gud create
 ./gud add file.txt
 ./gud commit -m "Initial commit"
+./gud log
+```
+
+Run tests:
+
+```bash
+make test
+```
+
+You will see stylized pass/fail message for each test suite, for instance:
+
+```bash
+🧪 Running gud add tests...
+✅ gud add passed
+🧪 Running gud commit tests...
+✅ gud commit passed
+...
+
 ```
 
 ## 🧠 Design Decisions
 
-- SHA-1 is used for content-addressed storage like Git.
+- Use SHA-1 hashing for all content addressing, similar to Git.
 
-- Blob objects are named by their hash and stored in subdirectories for performance.
+- Store blobs under .gud/objects/ in subdirectories by first two hash characters for performance.
 
-- The index is a flat file tracking <hash> <filepath>, enough for a minimal staging system.
+- The index is a simple flat file mapping `<hash> <filepath>` representing the staging area.
 
-- We use a header-only SHA-1 implementation for portability (no OpenSSL).
+- Commit objects include tree hash, optional parent hash, author, timestamp, and message.
+
+- `gud log` uses ANSI escape codes for vibrant terminal colorization and includes poetic theming for engagement.
+
+- Commit traversal in `log` follows the parent links to show full history.
+
+- Code organized modularly: separate headers and source files for clarity and reusability.
 
 ## 🚧 Upcoming Features
-
-- `gud log`: View commit history (linked list of commit objects)
 
 - `gud status`: See staged, modified, and untracked files
 

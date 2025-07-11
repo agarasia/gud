@@ -72,6 +72,26 @@ std::string getCurrentTime()
     return std::string(buf);
 }
 
+// A function to get the Current Commit Hash
+std::string getCurrentCommitHash()
+{
+    std::ifstream head(".gud/HEAD");
+    if (!head)
+        return "";
+
+    std::string refPath;
+    std::getline(head, refPath);
+    head.close();
+
+    std::ifstream refFile(".gud/" + refPath);
+    if (!refFile)
+        return "";
+
+    std::string currentHash;
+    std::getline(refFile, currentHash);
+    return currentHash;
+}
+
 // Write commit object with message and metadata
 std::string writeCommit(const std::string &treeHash, const std::string &parentHash, const std::string &message)
 {
@@ -91,6 +111,10 @@ std::string writeCommit(const std::string &treeHash, const std::string &parentHa
 
     oss << "Author: Aum, Time: " << getCurrentTime() << "\n";
     oss << "Commit: " << message << "\n";
+
+    std::string parentCommitHash = getCurrentCommitHash();
+    if (!parentCommitHash.empty())
+        oss << "Parent" << parentCommitHash << "\n";
 
     return writeObject(oss.str());
 }
