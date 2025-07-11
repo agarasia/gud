@@ -51,7 +51,7 @@ void handleAdd(const std::vector<std::string> &args)
 
         // Prepare storage path: .gud/objects/<first-two-hex>/<rest>.blob
         std::string dir = ".gud/objects/" + hash.substr(0, 2);
-        std::string file = hash.substr(2) + ".blob";
+        std::string file = hash.substr(2);
         std::filesystem::create_directories(dir);
 
         std::string fullPath = dir + "/" + file;

@@ -50,23 +50,49 @@ Blob storage path:
 .gud/objects/ab/cdef1234567890...blob
 ```
 
+### ✔️ `gud commit -m "message`
+
+Creates a new commit by:
+
+1. Reading all staged files from .gud/index.
+
+2. Writing a tree object representing the snapshot.
+
+3. Creating a commit object containing:
+
+   - Tree reference
+
+   - Parent commit (if any)
+
+   - Author, timestamp
+
+   - Commit message
+
+4. Updating the current branch (refs/heads/master) to point to the new commit.
+
+```bash
+./gud commit -m "initial commit"
+```
+
 ## 🏗️ Project Structure
 
 ```
 gud/
-├── .gud/ # Created at runtime – repository metadata
-├── include/ # Header files
-│ ├── hash.hpp # SHA-1 hashing
-│ └── index.hpp # Index (staging area) handling
-├── src/ # Implementation files
-│ ├── add.cpp # gud add
-│ ├── commit.cpp # gud commit (stub)
-│ ├── init.cpp # gud init
-│ ├── hash.cpp # Implements hashing
-│ └── index.cpp # Index I/O
-├── main.cpp # CLI entry point and dispatcher
-├── Makefile # Build configuration
-└── README.md
+├── .gud/                 # Created at runtime – repository metadata
+├── include/              # Header files
+│   ├── hash.hpp          # SHA-1 hashing logic
+│   ├── index.hpp         # Staging area (index) handling
+│   ├── commit.hpp        # Commit logic
+│   └── sha1.hpp          # Header-only SHA-1 implementation
+├── src/                  # Implementation files
+│   ├── create.cpp          # gud create
+│   ├── add.cpp           # gud add
+│   ├── commit.cpp        # gud commit
+│   ├── hash.cpp          # Hashing wrappers
+│   └── index.cpp         # Index file parsing & writing
+├── main.cpp              # CLI entry point
+├── Makefile              # Build configuration
+└── README.md             # This file
 ```
 
 ## 🛠️ Build Instructions
@@ -87,7 +113,7 @@ Run
 ```
 ./gud create
 ./gud add file.txt
-cat .gud/index
+./gud commit -m "Initial commit"
 ```
 
 ## 🧠 Design Decisions
@@ -102,15 +128,15 @@ cat .gud/index
 
 ## 🚧 Upcoming Features
 
-- gud commit: Create commits referencing blobs in the index.
+- `gud log`: View commit history (linked list of commit objects)
 
-- gud log: View commit history.
+- `gud status`: See staged, modified, and untracked files
 
-- gud checkout: Restore working directory from a specific commit.
+- `gud checkout` <hash>: Restore files from a specific commit
 
-- Branching and merging.
+- `gud branch`, `gud merge`: Basic branching and merging support
 
-- Diff and status.
+- `gud diff`: Show file differences
 
 ## 📜 License
 

@@ -69,6 +69,13 @@ public:
         return sha1.final();
     }
 
+    static std::string hashString(const std::string &str)
+    {
+        SHA1 sha1;
+        sha1.update(str);
+        return sha1.final();
+    }
+
 private:
     void reset()
     {
