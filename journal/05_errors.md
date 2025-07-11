@@ -26,12 +26,32 @@ Ensure file is created during gud create using:
 std::ofstream(".gud/refs/heads/master")
 ```
 
-## 🐛 Commit and tree objects were saved with `.blob` extensions
+---
 
-**Fix:**
-Fixed by writing files with no extension - hash alone determines object type.
+## 🐛 Index Handling: Missing duplicate content entries with different paths
 
-## 🐛 `.blob` extension was inconsistently added to some object files
+**Symptom:**  
+Adding multiple files with the same content hash resulted in only one entry appearing in `.gud/index`.
 
-**Fix:**
-Fixed by ensuring all object files (blobs, trees, commits) are stored with just the SHA-1 hash and no extension, Git-style.
+**Cause:**  
+The update logic only checked if a hash already existed in the index, ignoring that multiple files can share the same hash.
+
+**Fix:**  
+Changed `updateIndex()` to use a map from file path to hash, ensuring unique file paths are tracked even if hashes duplicate.
+
+Also ensured `handleAdd()` always updates the index for every file, regardless of whether the blob already exists.
+
+---
+
+## 🐛 Blob File Extension Inconsistency
+
+**Symptom:**  
+Some blob objects were stored with `.blob` extensions, others without.
+
+**Cause:**  
+Inconsistent file naming in different parts of the code.
+
+**Fix:**  
+Removed `.blob` extensions entirely to match Git-style storage, where the hash alone determines the object filename.
+
+---
