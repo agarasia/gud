@@ -89,7 +89,7 @@ std::string writeCommit(const std::string &treeHash, const std::string &parentHa
         oss << "parent " << parentHash << "\n";
     }
 
-    oss << "Author: Aum, email: aum@gud.com " << getCurrentTime() << "\n";
+    oss << "Author: Aum, Time: " << getCurrentTime() << "\n";
     oss << "Commit: " << message << "\n";
 
     return writeObject(oss.str());

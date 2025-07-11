@@ -27,6 +27,16 @@ std::string readFile(const std::string &path)
     return oss.str();
 }
 
+// Helper function to lowercase a string
+std::string toLower(const std::string &str)
+{
+    std::string lower = str;
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+                   [](unsigned char c)
+                   { return std::tolower(c); });
+    return lower;
+}
+
 // Parse commit file key: value pairs into a map
 std::map<std::string, std::string> parseCommit(const std::string &content)
 {
@@ -39,17 +49,33 @@ std::map<std::string, std::string> parseCommit(const std::string &content)
         if (line.empty())
             continue;
 
-        auto pos = line.find(':');
-        if (pos == std::string::npos)
+        std::string key, value;
+        auto colonPos = line.find(':');
+        auto spacePos = line.find(' ');
+
+        if (colonPos != std::string::npos && (colonPos < spacePos || spacePos == std::string::npos))
+        {
+            // Format: Key: Value
+            key = line.substr(0, colonPos);
+            value = line.substr(colonPos + 1);
+        }
+        else if (spacePos != std::string::npos)
+        {
+            // Format: key value
+            key = line.substr(0, spacePos);
+            value = line.substr(spacePos + 1);
+        }
+        else
+        {
             continue;
+        }
 
-        std::string key = line.substr(0, pos);
-        std::string value = line.substr(pos + 1);
-
-        // Trim leading/trailing whitespace from key and value
+        // Trim whitespace
         key.erase(key.find_last_not_of(" \t\r\n") + 1);
         value.erase(0, value.find_first_not_of(" \t\r\n"));
 
+        // Normalize key to lowercase
+        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
         fields[key] = value;
     }
 
@@ -121,14 +147,21 @@ void logCommits()
 
     auto fields = parseCommit(buffer.str());
 
-    std::cout << "Commit: " << commitHash << "\n";
-    if (fields.count("Commit"))
+    std::cout << "\033[1;34mCommit: " << commitHash << "\n";
+
+    if (fields.count("tree"))
     {
-        std::cout << "Message: " << fields["Commit"] << "\n";
+        std::cout << "\033[1;32mTree:   " << fields["tree"] << "\n";
     }
-    else
+
+    if (fields.count("author"))
     {
-        std::cout << "Message: <no message>\n";
+        std::cout << "\033[1;36mAuthor: " << fields["author"] << "\n";
+    }
+
+    if (fields.count("commit"))
+    {
+        std::cout << "\033[1;33mMessage: " << fields["commit"] << "\n";
     }
 
     std::cout << "\n";
