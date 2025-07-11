@@ -1,6 +1,6 @@
 # gud
 
-![alt text](image.png)
+<img src="image.png" width="40%"/>
 
 `gud` is a simple version control system written in C++, inspired by Git — and the classic Dark Souls joke “git gud”.
 
