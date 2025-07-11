@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "log.hpp"
 
 void handleCreate();
 void handleAdd(const std::vector<std::string> &args);
@@ -12,6 +13,16 @@ void handleCommit(const std::vector<std::string> &args);
 
 int main(int argc, char *argv[])
 {
+    if (argc > 1)
+    {
+        std::string cmd = argv[1];
+        if (cmd == "log")
+        {
+            logCommits();
+            return 0;
+        }
+    }
+
     // Ensure we have at least one argument
     if (argc < 2)
     {

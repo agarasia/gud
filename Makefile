@@ -3,14 +3,14 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude
 
 # === Source Files ===
-SRC = src/create.cpp src/add.cpp src/commit.cpp src/index.cpp src/hash.cpp main.cpp
+SRC = src/create.cpp src/add.cpp src/commit.cpp src/index.cpp src/hash.cpp src/log.cpp main.cpp
 OBJ = $(SRC:.cpp=.o)
 
 # === Executable ===
 BIN = gud
 
 # === Test Binaries ===
-TESTS = tests/test_add tests/test_commit tests/test_commit_multiple
+TESTS = tests/test_add tests/test_commit tests/test_commit_multiple tests/test_log
 
 # === Default Target ===
 all: $(BIN)
@@ -32,6 +32,9 @@ tests/test_commit: tests/test_commit.cpp src/index.cpp src/commit.cpp src/hash.c
 tests/test_commit_multiple: tests/test_commit_multiple.cpp src/index.cpp src/commit.cpp src/hash.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
+tests/test_log: tests/test_log.cpp src/index.cpp src/log.cpp src/hash.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
 # === Run tests ===
 test: $(TESTS)
 	@echo "🧪 Running gud add tests..."
@@ -42,6 +45,9 @@ test: $(TESTS)
 
 	@echo "🧪 Running gud commit multiple tests..."
 	@./tests/test_commit_multiple && echo "✅ gud commit (multiple) passed" || echo "❌ gud commit (multiple) failed"
+
+	@echo "🧪 Running gud log tests..."
+	@./tests/test_log && echo "✅ gud log passed" || echo "❌ gud log failed"
 
 # === Clean ===
 clean:
