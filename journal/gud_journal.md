@@ -8,8 +8,9 @@ This folder contains a chronological breakdown of the design, implementation, de
 - [02 — `gud add`](#02--gud-add)
 - [03 — `gud commit`](#03--gud-commit)
 - [04 — `gud log`](#04--gud-log)
-- [05 — Build System](#05--build-system)
-- [06 — Error Logs & Fixes](#06--error-logs--fixes)
+- [05 - `gud omen`](#05--gud-omen)
+- [06 — Build System](#05--build-system)
+- [07 — Error Logs & Fixes](#06--error-logs--fixes)
 
 ## 01 — `gud create`
 
@@ -120,7 +121,46 @@ Traverse commit history and display structured log output
 - Fix: assign `currentHash = fields["parent"]` in traversal
 - Parsing inconsistency from early commit formatting — fixed by enforcing key normalization and expected structure
 
-## 05 — Build System
+## 05 — `gud omen`
+
+### 📌 Goal
+
+Show the current state of the working directory in a Souls-themed fashion
+
+### 🛠 Process
+
+- Load `.gud/index` entries (staged files and their hashes)
+- Scan all working directory files (excluding `.gud/`)
+- For each staged file:
+  - If missing from working dir → mark as **Deleted**
+  - If SHA1 doesn't match → mark as **Modified**
+  - Any file not in the index → mark as **Untracked**
+
+### 🧠 Decisions
+
+- Name `omen` evokes the feel of a premonition, as if reading "the signs" before a battle — aligns with the Soulsborne aesthetic
+- Add separate test Color-coded terminal output:
+  - 🔴 Deleted
+  - 🟡 Modified
+  - 🟢 Untracked
+- Reused `hash.hpp` and `index.hpp` for file hashing and index loading
+
+### 💬 Sample Output
+
+```bash
+[OMEN] Reading signs of the file system...
+Modified: notes.txt
+Deleted: lore.txt
+Untracked: abyss.md
+```
+
+If no changes:
+
+```bash
+[OMEN] The realm is calm. No foul presences detected.
+```
+
+## 06 — Build System
 
 ### 📌 Goal
 
@@ -146,7 +186,7 @@ Setup a Makefile to build all components and support testing
 - Missing separator in Makefile from indentation issues → use TABs only
 - Duplicate symbol error for functions defined in multiple places — fixed with proper header usage
 
-## 06 — Error Logs & Fixes
+## 07 — Error Logs & Fixes
 
 ### ❌ `std::out_of_range` from `ref.substr(5)`
 

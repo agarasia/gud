@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "log.hpp"
+#include "omen.hpp"
 
 void handleCreate();
 void handleAdd(const std::vector<std::string> &args);
@@ -19,6 +20,11 @@ int main(int argc, char *argv[])
         if (cmd == "log")
         {
             logCommits();
+            return 0;
+        }
+        else if (cmd == "omen")
+        {
+            omen();
             return 0;
         }
     }
