@@ -5,3 +5,4 @@
 #include <string>
 
 void handleCommit(const std::vector<std::string> &args);
+std::string getCurrentCommitHash(); // Get the current commit hash from the HEAD reference

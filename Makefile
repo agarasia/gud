@@ -3,7 +3,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude
 
 # === Source Files ===
-SRC = src/create.cpp src/add.cpp src/commit.cpp src/index.cpp src/hash.cpp src/log.cpp src/omen.cpp main.cpp
+SRC = src/create.cpp src/add.cpp src/commit.cpp src/index.cpp src/hash.cpp src/log.cpp src/omen.cpp main.cpp src/utils.cpp
 OBJ = $(SRC:.cpp=.o)
 
 # === Executable ===

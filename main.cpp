@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         }
         else if (cmd == "omen")
         {
-            omen();
+            handleOmen();
             return 0;
         }
     }

@@ -79,9 +79,14 @@ std::string getCurrentCommitHash()
     if (!head)
         return "";
 
-    std::string refPath;
-    std::getline(head, refPath);
+    std::string refLine;
+    std::getline(head, refLine);
     head.close();
+
+    if (refLine.rfind("ref: ", 0) != 0)
+        return refLine; // Direct commit hash
+
+    std::string refPath = refLine.substr(5); // Strip "ref: "
 
     std::ifstream refFile(".gud/" + refPath);
     if (!refFile)

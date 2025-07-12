@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include "utils.hpp"
 
 // ANSI color codes for terminal output
 #define COLOR_RESET "\033[0m"
@@ -15,17 +16,6 @@
 #define COLOR_CYAN "\033[36m"
 #define COLOR_RED "\033[31m"
 #define COLOR_BOLD "\033[1m"
-
-// Helper function to read whole file into a string
-std::string readFile(const std::string &path)
-{
-    std::ifstream in(path, std::ios::binary);
-    if (!in)
-        return "";
-    std::ostringstream oss;
-    oss << in.rdbuf();
-    return oss.str();
-}
 
 // Helper function to lowercase a string
 std::string toLower(const std::string &str)
