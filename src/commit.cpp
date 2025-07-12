@@ -11,11 +11,12 @@
 #include "index.hpp"
 #include "hash.hpp"
 #include "sha1.hpp"
+#include "utils.hpp"
 
-std::string writeObject(const std::string &content)
+std::string writeObject(const std::string &content, const std::string &gudRoot)
 {
     std::string hash = SHA1::hashString(content);
-    std::string dir = ".gud/objects/" + hash.substr(0, 2);
+    std::string dir = gudRoot + "/.gud/objects/" + hash.substr(0, 2);
     std::string file = hash.substr(2);
     std::filesystem::create_directories(dir);
 
@@ -29,9 +30,9 @@ std::string writeObject(const std::string &content)
 }
 
 // Read HEAD and get the current parent commit hash (if any)
-std::string getParentHash()
+std::string getParentHash(const std::string &gudRoot)
 {
-    std::ifstream head(".gud/HEAD");
+    std::ifstream head(gudRoot + "/.gud/HEAD");
     std::string ref;
     if (!std::getline(head, ref))
         return "";
@@ -54,13 +55,13 @@ std::string getParentHash()
 }
 
 // Write Tree Object and return its hash
-std::string writeTree(const IndexMap &index)
+std::string writeTree(const IndexMap &index, const std::string &gudRoot)
 {
     std::ostringstream oss;
     for (const auto &[path, hash] : index)
         oss << "blob" << hash << " " << path << "\n";
 
-    return writeObject(oss.str());
+    return writeObject(oss.str(), gudRoot);
 }
 
 std::string getCurrentTime()
@@ -73,9 +74,9 @@ std::string getCurrentTime()
 }
 
 // A function to get the Current Commit Hash
-std::string getCurrentCommitHash()
+std::string getCurrentCommitHash(const std::string &gudRoot)
 {
-    std::ifstream head(".gud/HEAD");
+    std::ifstream head(gudRoot + "/.gud/HEAD");
     if (!head)
         return "";
 
@@ -84,11 +85,10 @@ std::string getCurrentCommitHash()
     head.close();
 
     if (refLine.rfind("ref: ", 0) != 0)
-        return refLine; // Direct commit hash
+        return refLine;
 
-    std::string refPath = refLine.substr(5); // Strip "ref: "
-
-    std::ifstream refFile(".gud/" + refPath);
+    std::string refPath = gudRoot + "/.gud/" + refLine.substr(5);
+    std::ifstream refFile(refPath);
     if (!refFile)
         return "";
 
@@ -98,7 +98,7 @@ std::string getCurrentCommitHash()
 }
 
 // Write commit object with message and metadata
-std::string writeCommit(const std::string &treeHash, const std::string &parentHash, const std::string &message)
+std::string writeCommit(const std::string &treeHash, const std::string &parentHash, const std::string &message, const std::string &gudRoot)
 {
     if (treeHash.empty())
     {
@@ -117,15 +117,22 @@ std::string writeCommit(const std::string &treeHash, const std::string &parentHa
     oss << "Author: Aum, Time: " << getCurrentTime() << "\n";
     oss << "Commit: " << message << "\n";
 
-    std::string parentCommitHash = getCurrentCommitHash();
+    std::string parentCommitHash = getCurrentCommitHash(gudRoot);
     if (!parentCommitHash.empty())
         oss << "Parent" << parentCommitHash << "\n";
 
-    return writeObject(oss.str());
+    return writeObject(oss.str(), gudRoot);
 }
 
 void handleCommit(const std::vector<std::string> &args)
 {
+    std::string gudRoot = findGudRoot();
+    if (gudRoot.empty())
+    {
+        std::cerr << "[Commit] No .gud repository found in this or parent directories.\n";
+        return;
+    }
+
     if (args.size() < 2 || args[0] != "-m")
     {
         std::cerr << "[COMMIT]  The abyss rejects thy command.\n"
@@ -135,7 +142,7 @@ void handleCommit(const std::vector<std::string> &args)
     }
 
     std::string message = args[1];
-    IndexMap index = loadIndex();
+    IndexMap index = loadIndex(gudRoot);
 
     if (index.empty())
     {
@@ -143,18 +150,18 @@ void handleCommit(const std::vector<std::string> &args)
         return;
     }
 
-    std::string parentHash = getParentHash();
-    std::string treeHash = writeTree(index);
-    std::string commitHash = writeCommit(treeHash, parentHash, message);
+    std::string parentHash = getParentHash(gudRoot);
+    std::string treeHash = writeTree(index, gudRoot);
+    std::string commitHash = writeCommit(treeHash, parentHash, message, gudRoot);
 
     std::cout << "[Commit] A new commit hath been forged in fire.\n"
               << "         Hash: " << commitHash << "\n";
 
     // ✅ Clear index
-    saveIndex({});
+    saveIndex({}, gudRoot);
 
     // Update branch reference
-    std::ifstream head(".gud/HEAD");
+    std::ifstream head(gudRoot + "/.gud/HEAD");
     std::string refLine;
     if (!std::getline(head, refLine) || refLine.rfind("ref: ", 0) != 0)
     {
@@ -163,9 +170,8 @@ void handleCommit(const std::vector<std::string> &args)
     }
 
     std::string branchRef = refLine.substr(5); // safe now
-    std::string branchPath = ".gud/" + branchRef;
+    std::string branchPath = gudRoot + "/.gud/" + branchRef;
 
-    // Write commit hash to branch ref
     std::ofstream out(branchPath);
     if (!out)
     {

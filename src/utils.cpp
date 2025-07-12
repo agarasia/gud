@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <algorithm>
 #include "utils.hpp"
 
 std::string readFile(const std::string &path)
@@ -43,4 +44,19 @@ std::set<std::string> loadIgnoreList(const std::string &gudRoot)
     ignore.insert("a.out");
 
     return ignore;
+}
+
+bool isIgnored(const std::string &path, const std::set<std::string> &ignoreList)
+{
+    for (const auto &pattern : ignoreList)
+    {
+        if (path == pattern || path.find(pattern) != std::string::npos)
+        {
+            return true; // Path matches an ignore pattern
+        }
+
+        // TODO: Add support for glob patterns
+        // For now, we only check exact matches and simple substrings
+    }
+    return false; // Path is not ignored
 }

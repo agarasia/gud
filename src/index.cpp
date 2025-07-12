@@ -4,22 +4,29 @@
 #include "index.hpp"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <filesystem>
 
 const std::string INDEX_PATH = ".gud/index";
 
 // Load the index into a map from the filepath -> blob hash
-IndexMap loadIndex()
+IndexMap loadIndex(const std::string &gudRoot)
 {
     IndexMap index;
-    std::ifstream file(INDEX_PATH);
-    std::string line;
+    std::filesystem::path idxPath = std::filesystem::path(gudRoot) / ".gud" / "index";
+    std::ifstream file(idxPath);
+    if (!file)
+    {
+        std::cerr << "\033[1;31m[ERROR]\033[0m Failed to open index file: " << gudRoot << INDEX_PATH << "\n";
+        return index;
+    }
 
+    std::string line;
     while (std::getline(file, line))
     {
         std::istringstream iss(line);
         std::string hash, path;
-        if (iss >> hash >> std::ws && std::getline(iss, path))
+        if (iss >> hash >> path)
         {
             index[path] = hash;
         }
@@ -29,12 +36,20 @@ IndexMap loadIndex()
 }
 
 // Writing the index to disk
-void saveIndex(const IndexMap &index)
+void saveIndex(const IndexMap &index, const std::string &gudRoot)
 {
-    std::ofstream file(INDEX_PATH, std::ios::trunc);
+    std::filesystem::path idxPath = std::filesystem::path(gudRoot) / ".gud" / "index";
+    std::ofstream indexFile(idxPath, std::ios::trunc);
+
+    if (!indexFile)
+    {
+        std::cerr << "\033[1;31m[ERROR]\033[0m Failed to open index file: " << idxPath << "\n";
+        return;
+    }
+
     for (const auto &[path, hash] : index)
     {
-        file << hash << " " << path << "\n";
+        indexFile << hash << " " << path << "\n";
     }
 }
 
